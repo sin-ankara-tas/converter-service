@@ -59,16 +59,31 @@ public class NumberToTextAssembler extends Assembler {
 		
 		this.locale = locale;
 		
-		if(numbersTextMap.containsKey(number)) {
-			return numbersTextMap.get(number);
+		this.number = number;
+		
+		boolean isNegative = false;
+		
+		if(number < 0) {
+			this.number = number * -1;
+			isNegative = true;
 		}
 		
-		this.number = number;
+		if(numbersTextMap.containsKey(number)) {
+			String i18nText = messageSource.getMessage(numbersTextMap.get(number), null, locale);
+			return addMinusText(isNegative) + i18nText;
+		}
 		
 		String convertedNumberText = getDigitsText(BILLION) + getDigitsText(MILLION)
 				+ getDigitsText(THOUSAND) + getDigitsText(ONE);
 		
-		return convertedNumberText;
+		return addMinusText(isNegative) + convertedNumberText;
+	}
+	
+	private String addMinusText(boolean isNegative) {
+		if(isNegative) {
+			 return messageSource.getMessage("negative", null, locale);
+		}
+		return "";
 	}
 	
 	private String getDigitsText(Integer digit) {
@@ -101,7 +116,7 @@ public class NumberToTextAssembler extends Assembler {
 	private String getOnesDigitText(Integer part) {
 		Integer onesDigits = part % 10;
 		
-		if(onesDigits != 0) {
+		if(onesDigits != 0 && onesDigits != 1) {
 			String i18nText = messageSource.getMessage(numbersTextMap.get(onesDigits), null, locale);
 			return " " + i18nText;
 		}
@@ -129,7 +144,7 @@ public class NumberToTextAssembler extends Assembler {
 			if(hundredsDigit == 1) {
 				return hundred;
 			} else {
-				String i18nText = messageSource.getMessage(digitsTextMap.get(hundredsDigit), null, locale);
+				String i18nText = messageSource.getMessage(numbersTextMap.get(hundredsDigit), null, locale);
 				return i18nText + " " + hundred;
 			}
 		}
